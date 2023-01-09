@@ -38,7 +38,7 @@ class FlightSearch:
         res_search = requests.get(
             url=self.flight_search, params=self.search_quary, headers=self.kiwi_headers)
         flight_list = [{"id": item.get("id"), "fromCode": item.get("cityCodeFrom"),"fromCity": item.get("cityFrom"), "toCode": item.get("cityCodeTo"),"toCity": item.get("cityTo"), "price": item.get(
-            "price"), "duration": item.get("duration").get("total")} for item in res_search.json()["data"]]
+            "price"), "duration": item.get("duration").get("total"), "departure":item.get('local_departure')} for item in res_search.json()["data"]]
         
         return flight_list
     

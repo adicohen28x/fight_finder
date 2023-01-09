@@ -4,6 +4,7 @@ import datetime
 import requests
 from operator import itemgetter
 from dotenv import load_dotenv
+from notification_manager import NotificationManager
 load_dotenv()
 
 
@@ -13,10 +14,12 @@ class DataManager:
         self.sheet_url = os.getenv("SHEET_URL")
         self.cities_list = None
         self.table = self.getSheet()
+        self.notify = NotificationManager()
 
     def getSheet(self):
         # getting cities names from sheet:
         res = requests.get(url=self.sheet_url)
+        print(res.status_code)
         table = res.json()['prices']
         self.cities_list = [item['city']
                             for item in table]
@@ -40,8 +43,12 @@ class DataManager:
             body = {"city": row.get("city"), "iataCode": row.get("iataCode"), "lowestPrice": row.get("lowestPrice"), "id": row.get("id")}
             for flight in search:
                 if flight.get("toCity") == body.get("city"):
+                    city = flight.get("toCity")
                     if flight.get("price") < body.get("lowestPrice"):
+                        amount = flight.get("price")
+                        date = flight.get('departure')[:10]
                         body["lowestPrice"] = flight.get("price")
+                        self.notify.sendNotify(f"wow flight to {city} is only {amount}$ on {date}!!!")
                     else:
                         break
             body_to_sent = {"price": body}
